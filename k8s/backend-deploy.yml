@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: legos-backend
+  labels:
+    app: legos-backend-deployment
+    spec: backend
+  namespace: legos
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate 
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: legos-backend-pods
+  template:
+    metadata:
+      name: legos-backend-pods
+      labels:
+        app: legos-backend-pods
+    spec:
+      containers:
+        - name: legos-backend-container
+          image: trahulprabhu38/lego-backend-linux:v1
+          ports:
+          - containerPort: 3001
+          resources: {}
+            

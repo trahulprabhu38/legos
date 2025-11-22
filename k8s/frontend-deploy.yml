@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: lego-frontend-deployment
+    spec: frontend
+  name: lego-frontend-deployment
+  namespace: legos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lego-frontend-deployment
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: lego-frontend-deployment
+    spec:
+      containers:
+      - image: trahulprabhu38/lego-linux:v1
+        name: lego-frontend-container
+        ports:
+        - containerPort: 80
+        resources: {}
+status: {}

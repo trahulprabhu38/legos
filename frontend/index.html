@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEGO Cloud</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* ========== AUTH PAGE STYLES ========== */
+        #auth-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            min-height: 500px;
+        }
+
+        .auth-left {
+            flex: 1;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+
+        .auth-left h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-weight: 800;
+            color: white;
+            -webkit-text-fill-color: white;
+        }
+
+        .auth-left p {
+            font-size: 18px;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+
+        .lego-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+        }
+
+        .auth-right {
+            flex: 1;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-container {
+            max-width: 350px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .form-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .form-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .toggle-form a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        /* ========== DASHBOARD STYLES ========== */
+        #dashboard-page {
+            display: none;
+        }
+
+        #ui-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(250, 250, 250, 0.98));
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.2);
+            width: 240px;
+            max-height: 90vh;
+            overflow-y: auto;
+            user-select: none;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 26px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            border-bottom: 3px solid;
+            border-image: linear-gradient(90deg, #667eea, #764ba2) 1;
+            padding-bottom: 12px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .user-info .username {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-weight: bold;
+            letter-spacing: 1.2px;
+            margin-top: 18px;
+        }
+
+        .colors { display: flex; gap: 8px; flex-wrap: wrap; }
+        .color-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+        .color-btn:hover {
+            transform: scale(1.15);
+        }
+        .color-btn.active {
+            transform: scale(1.25);
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+
+        .sizes { display: flex; gap: 6px; flex-wrap: wrap; }
+        .size-btn {
+            padding: 8px 12px;
+            background: linear-gradient(145deg, #f5f5f5, #e8e8e8);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+            flex: 1 0 30%;
+            transition: all 0.2s;
+        }
+        .size-btn:hover {
+            background: linear-gradient(145deg, #e8e8e8, #ddd);
+            transform: translateY(-2px);
+        }
+        .size-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 25px;
+            border-top: 2px solid #f0f0f0;
+            padding-top: 18px;
+        }
+
+        .action-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: all 0.3s;
+            font-size: 13px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        }
+
+        #save-btn { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        #load-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        #clear-btn { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+
+        #history-overlay {
+            display: none;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, #ffffff, #f8f8f8);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.4);
+            width: 350px;
+            z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        #history-overlay h3 {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        #history-list {
+            list-style: none;
+            padding: 0;
+            max-height: 350px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .history-item {
+            padding: 14px;
+            border-bottom: 1px solid #e8e8e8;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            transform: translateX(5px);
+            border-color: transparent;
+        }
+
+        .close-history {
+            float: right;
+            cursor: pointer;
+            font-weight: bold;
+            color: #999;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .close-history:hover {
+            color: #667eea;
+            transform: rotate(90deg);
+        }
+
+        .notification {
+            position: fixed; bottom: 30px; right: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 16px 28px;
+            border-radius: 12px;
+            opacity: 0;
+            transition: all 0.5s;
+            pointer-events: none;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            font-weight: 600;
+            z-index: 1001;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+            }
+
+            .auth-left {
+                padding: 40px 30px;
+            }
+
+            .auth-right {
+                padding: 40px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Page -->
+    <div id="auth-page">
+        <div class="auth-container">
+            <div class="auth-left">
+                <div class="lego-icon">🧱</div>
+                <h1>LEGO land</h1>
+                <p>Build, save, and share your amazing LEGO creations in the cloud!</p>
+            </div>
+
+            <div class="auth-right">
+                <div class="form-container">
+                    <div id="error-message" class="error-message"></div>
+                    <div id="success-message" class="success-message"></div>
+
+                    <!-- Login Form -->
+                    <form id="login-form">
+                        <h2 class="form-title">Welcome Back!</h2>
+                        <p class="form-subtitle">Sign in to continue building</p>
+
+                        <div class="form-group">
+                            <label for="login-username">Username</label>
+                            <input type="text" id="login-username" placeholder="Enter your username" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" placeholder="Enter your password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+
+                        <div class="toggle-form">
+                            Don't have an account? <a onclick="toggleForms()">Sign Up</a>
+                        </div>
+                    </form>
+
+                    <!-- Signup Form -->
+                    <form id="signup-form" style="display: none;">
+                        <h2 class="form-title">Join LEGO Cloud</h2>
+                        <p class="form-subtitle">Create your account to start building</p>
+
+                        <div class="form-group">
+                            <label for="signup-username">Username</label>
+                            <input type="text" id="signup-username" placeholder="Choose a username" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-password">Password</label>
+                            <input type="password" id="signup-password" placeholder="Create a password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Sign Up</button>
+
+                        <div class="toggle-form">
+                            Already have an account? <a onclick="toggleForms()">Sign In</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboard-page">
+        <div id="ui-container">
+            <h1>LEGO Cloud</h1>
+
+            <div class="user-info">
+                <div class="username">
+                    <span>👤</span>
+                    <span id="username-display">Loading...</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="section-title">Color</div>
+            <div class="colors" id="color-palette"></div>
+
+            <div class="section-title">Size</div>
+            <div class="sizes" id="size-palette">
+                <button class="size-btn active" onclick="setBrickSize(1,1)">1x1</button>
+                <button class="size-btn" onclick="setBrickSize(2,1)">2x1</button>
+                <button class="size-btn" onclick="setBrickSize(2,2)">2x2</button>
+                <button class="size-btn" onclick="setBrickSize(4,2)">4x2</button>
+                <button class="size-btn" onclick="setBrickSize(6,2)">6x2</button>
+            </div>
+
+            <div class="actions">
+                <button id="save-btn" class="action-btn" onclick="saveToDB()">💾 Save Build</button>
+                <button id="load-btn" class="action-btn" onclick="openHistory()">📂 My Builds</button>
+                <button id="clear-btn" class="action-btn" onclick="clearScene()">🗑️ Clear All</button>
+            </div>
+
+            <div style="font-size: 11px; color: #999; margin-top: 15px; text-align: center; line-height: 1.5;">
+                <strong>Controls:</strong><br>
+                Left Click: Build | Shift+Click: Delete<br>Right Click: Rotate Cam | 'R': Rotate Brick
+            </div>
+        </div>
+
+        <!-- History Modal -->
+        <div id="history-overlay">
+            <span class="close-history" onclick="document.getElementById('history-overlay').style.display='none'">✕</span>
+            <h3>Saved Builds</h3>
+            <div id="history-loading">Loading...</div>
+            <ul id="history-list"></ul>
+        </div>
+    </div>
+
+    <div id="notification" class="notification">Notification</div>
+
+    <!-- Three.js Import -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+
+        // --- CONFIG ---
+        const API_URL = 'http://localhost:3001/api';
+        const UNIT_SIZE = 25;
+        const BRICK_HEIGHT = 20;
+
+        const PALETTE = [
+            0xC91A09, 0x0055BF, 0xF2CD37, 0x287F46,
+            0xFFFFFF, 0x1B2A34, 0xA0A5A9, 0x9B00FF, 0xFF69B4
+        ];
+
+        // --- STATE ---
+        let scene, camera, renderer, raycaster, pointer;
+        let plane, rollOverMesh, rollOverMaterial;
+        let objects = [];
+        let isShiftDown = false;
+
+        let currentColor = PALETTE[0];
+        let currentSize = { w: 1, d: 1 };
+        let brickRotation = 0;
+
+        // User authentication
+        let userId = localStorage.getItem('userId');
+        let username = localStorage.getItem('username');
+
+        // ========== PAGE ROUTING ==========
+        function showAuthPage() {
+            document.getElementById('auth-page').style.display = 'flex';
+            document.getElementById('dashboard-page').style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.getElementById('auth-page').style.display = 'none';
+            document.getElementById('dashboard-page').style.display = 'block';
+            document.getElementById('username-display').textContent = username;
+
+            // Initialize 3D scene
+            if (!scene) {
+                init();
+                animate();
+                initUI();
+            }
+        }
+
+        // Check authentication on page load
+        if (!userId || !username) {
+            showAuthPage();
+        } else {
+            showDashboard();
+        }
+
+        // ========== AUTH FUNCTIONS ==========
+        window.toggleForms = () => {
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+
+            if (loginForm.style.display === 'none') {
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+            } else {
+                loginForm.style.display = 'none';
+                signupForm.style.display = 'block';
+            }
+
+            clearMessages();
+        };
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('success-message').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            document.getElementById('error-message').style.display = 'none';
+        }
+
+        function clearMessages() {
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+        }
+
+        // Handle Login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearMessages();
+
+            const usernameInput = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usernameInput, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    localStorage.setItem('userId', data.userId);
+                    localStorage.setItem('username', data.username);
+                    userId = data.userId;
+                    username = data.username;
+                    showSuccess('Login successful! Loading dashboard...');
+                    setTimeout(() => {
+                        showDashboard();
+                    }, 1000);
+                } else {
+                    showError(data.message || 'Invalid username or password');
+                }
+            } catch (error) {
+                showError('Connection error. Please make sure the server is running.');
+            }
+        });
+
+        // Handle Signup
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearMessages();
+
+            const usernameInput = document.getElementById('signup-username').value;
+            const password = document.getElementById('signup-password').value;
+
+            if (usernameInput.length < 3) {
+                showError('Username must be at least 3 characters long');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters long');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usernameInput, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showSuccess('Account created! Please sign in.');
+                    setTimeout(() => {
+                        window.toggleForms();
+                        document.getElementById('login-username').value = usernameInput;
+                    }, 1500);
+                } else {
+                    showError(data.message || 'Signup failed. Username may already exist.');
+                }
+            } catch (error) {
+                showError('Connection error. Please make sure the server is running.');
+            }
+        });
+
+        window.logout = () => {
+            localStorage.removeItem('userId');
+            localStorage.removeItem('username');
+            userId = null;
+            username = null;
+            showAuthPage();
+        };
+
+        // ========== 3D SCENE FUNCTIONS ==========
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xe8f4f8);
+            scene.fog = new THREE.Fog(0xe8f4f8, 500, 2500);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
+            camera.position.set(500, 600, 800);
+            camera.lookAt(0, 0, 0);
+
+            // Lighting
+            scene.add(new THREE.AmbientLight(0x606060, 1.5));
+            const dl = new THREE.DirectionalLight(0xffffff, 2);
+            dl.position.set(1, 0.75, 0.5).normalize();
+            scene.add(dl);
+
+            const spotLight = new THREE.SpotLight(0xffffff, 10000);
+            spotLight.position.set(100, 1000, 100);
+            spotLight.castShadow = true;
+            spotLight.shadow.mapSize.set(2048, 2048);
+            scene.add(spotLight);
+
+            // Interaction
+            raycaster = new THREE.Raycaster();
+            pointer = new THREE.Vector2();
+
+            // Grid/Floor
+            const geometry = new THREE.PlaneGeometry(2000, 2000);
+            geometry.rotateX(-Math.PI / 2);
+            plane = new THREE.Mesh(geometry, new THREE.ShadowMaterial({ opacity: 0.2 }));
+            plane.receiveShadow = true;
+            scene.add(plane);
+            objects.push(plane);
+            scene.add(new THREE.GridHelper(2000, 80));
+
+            updateRollOverMesh();
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
+
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+
+            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointerdown', onPointerDown);
+            document.addEventListener('keydown', onDocumentKeyDown);
+            document.addEventListener('keyup', onDocumentKeyUp);
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function createLegoGeometry(widthUnits, depthUnits) {
+            const w = widthUnits * UNIT_SIZE;
+            const h = BRICK_HEIGHT;
+            const d = depthUnits * UNIT_SIZE;
+
+            const baseGeo = new THREE.BoxGeometry(w - 0.5, h, d - 0.5);
+            baseGeo.translate(0, h / 2, 0);
+
+            const geometries = [baseGeo];
+            const studGeo = new THREE.CylinderGeometry(4, 4, 4, 16);
+            studGeo.translate(0, 2, 0);
+
+            for (let i = 0; i < widthUnits; i++) {
+                for (let j = 0; j < depthUnits; j++) {
+                    const stud = studGeo.clone();
+                    const x = (i * UNIT_SIZE) - (w / 2) + (UNIT_SIZE / 2);
+                    const z = (j * UNIT_SIZE) - (d / 2) + (UNIT_SIZE / 2);
+                    stud.translate(x, h, z);
+                    geometries.push(stud);
+                }
+            }
+            return BufferGeometryUtils.mergeGeometries(geometries);
+        }
+
+        function updateRollOverMesh() {
+            if (rollOverMesh) scene.remove(rollOverMesh);
+            const w = (brickRotation === 1) ? currentSize.d : currentSize.w;
+            const d = (brickRotation === 1) ? currentSize.w : currentSize.d;
+            const geo = createLegoGeometry(w, d);
+            rollOverMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.5, transparent: true });
+            rollOverMesh = new THREE.Mesh(geo, rollOverMaterial);
+            scene.add(rollOverMesh);
+        }
+
+        function placeBrickAt(x, y, z, color, w, d) {
+            const geo = createLegoGeometry(w, d);
+            const material = new THREE.MeshStandardMaterial({ color: color, roughness: 0.2 });
+            const voxel = new THREE.Mesh(geo, material);
+
+            voxel.position.set(x, y, z);
+            voxel.castShadow = true;
+            voxel.receiveShadow = true;
+
+            voxel.userData = {
+                isBrick: true,
+                width: w,
+                depth: d,
+                color: color
+            };
+
+            scene.add(voxel);
+            objects.push(voxel);
+            return voxel;
+        }
+
+        function onPointerMove(event) {
+            pointer.set((event.clientX / window.innerWidth) * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1);
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(objects, false);
+
+            if (intersects.length > 0) {
+                const intersect = intersects[0];
+                const target = intersect.point.clone().add(intersect.face.normal.clone());
+
+                rollOverMesh.position.x = Math.floor(target.x / UNIT_SIZE) * UNIT_SIZE + UNIT_SIZE / 2;
+                rollOverMesh.position.z = Math.floor(target.z / UNIT_SIZE) * UNIT_SIZE + UNIT_SIZE / 2;
+                rollOverMesh.position.y = Math.floor(target.y / BRICK_HEIGHT) * BRICK_HEIGHT;
+            }
+        }
+
+        function onPointerDown(event) {
+            if (event.target.closest('#ui-container') || event.target.closest('#history-overlay')) return;
+            if (event.button !== 0) return;
+
+            pointer.set((event.clientX / window.innerWidth) * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1);
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(objects, false);
+
+            if (intersects.length > 0) {
+                const intersect = intersects[0];
+                if (isShiftDown) {
+                    if (intersect.object !== plane) {
+                        scene.remove(intersect.object);
+                        objects.splice(objects.indexOf(intersect.object), 1);
+                    }
+                    return;
+                }
+
+                const w = (brickRotation === 1) ? currentSize.d : currentSize.w;
+                const d = (brickRotation === 1) ? currentSize.w : currentSize.d;
+
+                placeBrickAt(
+                    rollOverMesh.position.x,
+                    rollOverMesh.position.y,
+                    rollOverMesh.position.z,
+                    currentColor,
+                    w, d
+                );
+            }
+        }
+
+        function onDocumentKeyDown(event) {
+            switch (event.keyCode) {
+                case 16: isShiftDown = true; break;
+                case 82: brickRotation = brickRotation === 0 ? 1 : 0; updateRollOverMesh(); break;
+            }
+        }
+
+        function onDocumentKeyUp(event) {
+            if (event.keyCode === 16) isShiftDown = false;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+        // ========== UI FUNCTIONS ==========
+        window.setBrickSize = (w, d) => {
+            currentSize = { w, d };
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            updateRollOverMesh();
+        };
+
+        window.clearScene = () => {
+            for (let i = objects.length - 1; i >= 0; i--) {
+                if (objects[i] !== plane) scene.remove(objects[i]);
+            }
+            objects = [plane];
+        };
+
+        function initUI() {
+            const palette = document.getElementById('color-palette');
+            PALETTE.forEach((color, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'color-btn' + (index === 0 ? ' active' : '');
+                btn.style.backgroundColor = '#' + new THREE.Color(color).getHexString();
+                btn.onclick = () => {
+                    currentColor = color;
+                    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                };
+                palette.appendChild(btn);
+            });
+        }
+
+        // ========== DATABASE FUNCTIONS ==========
+        function showNotification(msg) {
+            const n = document.getElementById('notification');
+            n.innerText = msg;
+            n.style.opacity = 1;
+            setTimeout(() => n.style.opacity = 0, 2000);
+        }
+
+        window.saveToDB = async () => {
+            const bricksData = objects
+                .filter(obj => obj.userData && obj.userData.isBrick)
+                .map(obj => ({
+                    x: obj.position.x,
+                    y: obj.position.y,
+                    z: obj.position.z,
+                    width: obj.userData.width,
+                    depth: obj.userData.depth,
+                    color: obj.userData.color,
+                    rotation: 0
+                }));
+
+            if (bricksData.length === 0) {
+                showNotification("Nothing to save!");
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL + '/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bricks: bricksData, userId: userId })
+                });
+                const result = await response.json();
+                if (result.success) showNotification("Build Saved!");
+            } catch (e) {
+                console.error(e);
+                showNotification("Error saving to server");
+            }
+        };
+
+        window.openHistory = async () => {
+            const overlay = document.getElementById('history-overlay');
+            const list = document.getElementById('history-list');
+            const loading = document.getElementById('history-loading');
+
+            overlay.style.display = 'block';
+            list.innerHTML = '';
+            loading.style.display = 'block';
+
+            try {
+                const res = await fetch(API_URL + '/history/' + userId);
+                const builds = await res.json();
+                loading.style.display = 'none';
+
+                if (builds.length === 0) {
+                    list.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">No saved builds yet!</div>';
+                    return;
+                }
+
+                builds.forEach(build => {
+                    const date = new Date(build.createdAt).toLocaleString();
+                    const li = document.createElement('li');
+                    li.className = 'history-item';
+                    li.innerHTML = `<span>${date}</span> <span style="color: #667eea; font-weight: bold;">${build.bricks.length} bricks</span>`;
+                    li.onclick = () => loadBuild(build._id);
+                    list.appendChild(li);
+                });
+            } catch (e) {
+                loading.innerText = "Error loading history. Is server running?";
+            }
+        };
+
+        window.loadBuild = async (id) => {
+            try {
+                const res = await fetch(API_URL + '/load/' + id);
+                const build = await res.json();
+
+                clearScene();
+
+                build.bricks.forEach(b => {
+                    placeBrickAt(b.x, b.y, b.z, b.color, b.width, b.depth);
+                });
+
+                document.getElementById('history-overlay').style.display = 'none';
+                showNotification("Build Loaded!");
+            } catch (e) {
+                console.error(e);
+                showNotification("Error loading build");
+            }
+        };
+    </script>
+</body>
+</html>

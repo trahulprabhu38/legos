@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: lego-frontend-service
+  name: lego-frontend-service
+  namespace: legos
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: lego-frontend-deployment
+  type: NodePort
+status:
+  loadBalancer: {}
+
